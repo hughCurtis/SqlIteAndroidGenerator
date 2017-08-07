@@ -5,7 +5,6 @@
  */
 package com.virtualworld.entities;
 
-import com.virtualworld.gui.panels.DatabaseJPanel;
 import com.virtualworld.model.Database;
 import java.util.List;
 

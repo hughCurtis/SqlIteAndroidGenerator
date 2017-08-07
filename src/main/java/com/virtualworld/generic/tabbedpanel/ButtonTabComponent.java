@@ -9,7 +9,6 @@ import com.virtualworld.generic.tabbedpanel.listeners.TabCloseListener;
 import com.virtualworld.generic.tabbedpanel.listeners.TabEvents;
 import com.virtualworld.generic.tabbedpanel.listeners.TabRenameListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -62,11 +61,8 @@ public class ButtonTabComponent extends JPanel implements TabEvents {
         renameJMenuItem = new javax.swing.JMenuItem();
 
         renameJMenuItem.setText("Renommer");
-        renameJMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                renameJMenuItemActionPerformed(evt);
-            }
+        renameJMenuItem.addActionListener((ActionEvent evt) -> {
+            renameJMenuItemActionPerformed(evt);
         });
         relationOptionsJPopupMenu.add(renameJMenuItem);
 
@@ -80,20 +76,14 @@ public class ButtonTabComponent extends JPanel implements TabEvents {
         //tab button
 
         buttonRename.setInheritsPopupMenu(true);
-        buttonRename.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateRenameEventListeners(getId());
-            }
+        buttonRename.addActionListener((ActionEvent e) -> {
+            updateRenameEventListeners(getId());
         });
         add(buttonRename);
 
         buttonClose.setInheritsPopupMenu(true);
-        buttonClose.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateCloseEventListeners(getId());
-            }
+        buttonClose.addActionListener((ActionEvent e) -> {
+            updateCloseEventListeners(getId());
         });
         add(buttonClose);
         //add more space to the top of the component
@@ -126,9 +116,9 @@ public class ButtonTabComponent extends JPanel implements TabEvents {
 
     @Override
     public void updateCloseEventListeners(int elementId) {
-        for (TabCloseListener tcl : tabCloseListeners) {
+        tabCloseListeners.forEach((tcl) -> {
             tcl.onTabClose(elementId);
-        }
+        });
     }
 
     @Override
@@ -138,8 +128,8 @@ public class ButtonTabComponent extends JPanel implements TabEvents {
 
     @Override
     public void updateRenameEventListeners(int elementId) {
-        for (TabRenameListener trl : tabRenameListeners) {
+        tabRenameListeners.forEach((trl) -> {
             trl.onTabRename(elementId);
-        }
+        });
     }
 }

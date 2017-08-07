@@ -5,9 +5,6 @@
  */
 package com.virtualworld.entities;
 
-import com.virtualworld.gui.panels.DatabaseJPanel;
-import com.virtualworld.model.Database;
-
 /**
  *
  * @author Ulrich
@@ -124,7 +121,7 @@ public class Attribut {
         }
         //dans le fichier *OpenHelper.java
 
-        String str = "";
+        String str;
         if (pk == true) {
             str = indent + dataBaseName + "Contract."
                     + relationName + "Entry.COLUMN_" + name.toUpperCase() + " +\" " + type +" PRIMARY KEY AUTOINCREMENT";
