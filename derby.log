@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Mon Aug 07 21:04:50 WAT 2017:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.13.1.1 - (1765088): instance a816c00e-015d-be4c-cc26-000007076508 
+on database directory C:\Users\Ulrich\Documents\NetBeansProjects\SEED\SqlIteAndroidGenerator\tnu with class loader sun.misc.Launcher$AppClassLoader@7852e922 
+Loaded from file:/C:/Users/Ulrich/.m2/repository/org/apache/derby/derby/10.13.1.1/derby-10.13.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_66-b18
+user.dir=C:\Users\Ulrich\Documents\NetBeansProjects\SEED\SqlIteAndroidGenerator
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

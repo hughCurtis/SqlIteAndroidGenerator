@@ -5,6 +5,7 @@
  */
 package com.virtualworld.jtable;
 
+import com.virtualworld.dao.AttributJpaController;
 import com.virtualworld.entities.Attribut;
 import com.virtualworld.entities.DbTypes;
 import com.virtualworld.entities.Relation;
@@ -29,6 +30,7 @@ import javax.swing.JTable;
  */
 public class CustomRelationJTable extends JTable implements PKSelectionChangeListener, PKSelectionEvent {
 
+    private final AttributJpaController attributJpaController = new AttributJpaController();
     private final List<PKSelectionChangeListener> selectionChangeListeners = new ArrayList<>();
     private RelationTableModel model;
     private Relation relation;
@@ -60,7 +62,7 @@ public class CustomRelationJTable extends JTable implements PKSelectionChangeLis
             at.setName(nom + "");
             relations.add(at);
             at.setRelation(relation);
-            Database.addAttribut(at);
+            attributJpaController.create(at);
         }
         model = new RelationTableModel(relations);
         model.addPKSelectionChangeListener(this);

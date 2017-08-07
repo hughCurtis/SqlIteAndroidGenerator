@@ -5,6 +5,9 @@
  */
 package com.virtualworld.gui.panels;
 
+import com.virtualworld.dao.AttributJpaController;
+import com.virtualworld.dao.RelationJpaController;
+import com.virtualworld.dao.exceptions.NonexistentEntityException;
 import com.virtualworld.entities.Attribut;
 import com.virtualworld.entities.Relation;
 import com.virtualworld.jtable.CustomRelationJTable;
@@ -12,7 +15,6 @@ import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.models.RelationTableModel;
 import com.virtualworld.mediator.RelationFkMediator;
 import com.virtualworld.mediator.listeners.MediatorEventListener;
-import com.virtualworld.model.Database;
 import com.virtualworld.model.exceptions.NonExistantValueException;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -29,6 +31,10 @@ import javax.swing.JScrollPane;
 public class RelationJPanel extends javax.swing.JPanel
         implements MediatorEventListener, PKSelectionChangeListener {
 
+    private static final Logger LOG = Logger.getLogger(RelationJPanel.class.getName());
+
+    private final RelationJpaController relationJpaController = new RelationJpaController();
+    private final AttributJpaController attributJpaController = new AttributJpaController();
     private final int id;
     private Relation relation;
     private final CustomRelationJTable attributesJTable;
@@ -61,8 +67,13 @@ public class RelationJPanel extends javax.swing.JPanel
 
     private void saveInDatabase() {
         relation = new Relation();
-        Database.addRelation(relation);
+        relationJpaController.create(relation);
         relation.setName(Relation.DEFAULT_RELATION_NAME + " " + relation.getId());
+        try {
+            relationJpaController.edit(relation);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Erreur lors de l'édition de la relation", e);
+        }
     }
 
     public int getId() {
@@ -70,10 +81,14 @@ public class RelationJPanel extends javax.swing.JPanel
     }
 
     public void delete() throws NonExistantValueException {
-        Database.deleteRelation(id);
-        mediator.removeMediatorEventListener(this);
+        try {
+            relationJpaController.destroy(id);
+            mediator.removeMediatorEventListener(this);
 //        onRelationChange();
-        mediator.updateMediatorListeners();
+            mediator.updateMediatorListeners();
+        } catch (NonexistentEntityException e) {
+            LOG.log(Level.SEVERE, "Erreur lors de la suppression d'une relation", e);
+        }
     }
 
     /**
@@ -179,26 +194,22 @@ public class RelationJPanel extends javax.swing.JPanel
                 return;
             }
             RelationTableModel model = (RelationTableModel) attributesJTable.getModel();
-            Database.deleteAttribut(model.getAttributs().get(index).getId());
+            attributJpaController.destroy(model.getAttributs().get(index).getId());
             model.removeAttribute(index);
             mediator.updateMediatorListeners();
             attributesJTable.repaint();
-        } catch (NonExistantValueException ex) {
-            Logger.getLogger(RelationJPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NonexistentEntityException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_delJButtonActionPerformed
 
     private void addJButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addJButtonActionPerformed
-        try {
-            RelationTableModel model = (RelationTableModel) attributesJTable.getModel();
-            Attribut attribut = new Attribut();
-            attribut.setRelation(relation);
-            Database.addAttribut(attribut);
-            model.addAttribute(attribut);
-            attributesJTable.repaint();
-        } catch (NonExistantValueException ex) {
-            Logger.getLogger(RelationJPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        RelationTableModel model = (RelationTableModel) attributesJTable.getModel();
+        Attribut attribut = new Attribut();
+        attribut.setRelation(relation);
+        attributJpaController.create(attribut);
+        model.addAttribute(attribut);
+        attributesJTable.repaint();
     }//GEN-LAST:event_addJButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -214,7 +225,7 @@ public class RelationJPanel extends javax.swing.JPanel
     @Override
     public void onRelationChange() {
         JComboBox combo = new JComboBox();
-        Database.getPKAttributs().forEach((a) -> {
+        attributJpaController.getPKAttributes().forEach((a) -> {
             combo.addItem(a);
         });
         attributesJTable.getColumn("Clé étrangère").setCellEditor(new DefaultCellEditor(combo));

@@ -5,18 +5,31 @@
  */
 package com.virtualworld.entities;
 
-import com.virtualworld.model.Database;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 /**
  *
  * @author Ulrich
  */
-public class Relation {
+@Entity
+public class Relation implements Serializable {
 
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private String description = "";
+    @OneToMany(mappedBy = "relation", fetch = FetchType.EAGER)
+    private List<Attribut> attributs = new ArrayList<>();
 
     public static final String DEFAULT_RELATION_NAME = "Tab";
 
@@ -52,7 +65,6 @@ public class Relation {
     }
 
     public String toStringContract(int indentTimes) {
-        List<Attribut> attributs = Database.findAttributsByRelationId(id);
         String indent = "";
         for (int i = 0; i < indentTimes; i++) {
             indent += "\t";
@@ -69,7 +81,6 @@ public class Relation {
     }
 
     public String toStringOpenHelper(int indentTimes,String dataBaseName) {
-        List<Attribut> attributs = Database.findAttributsByRelationId(id);
         String indent = "";
         for (int i = 0; i < indentTimes; i++) {
             indent += "\t";
@@ -86,6 +97,13 @@ public class Relation {
         return str + indent + "}\n";
     }
 
+    public List<Attribut> getAttributs() {
+        return attributs;
+    }
+
+    public void setAttributs(List<Attribut> attributs) {
+        this.attributs = attributs;
+    }
 
     @Override
     public int hashCode() {

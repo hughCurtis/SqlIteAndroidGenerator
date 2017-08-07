@@ -5,6 +5,7 @@
  */
 package com.virtualworld.gui.panels;
 
+import com.virtualworld.dao.RelationJpaController;
 import com.virtualworld.entities.Relation;
 import com.virtualworld.generic.tabbedpanel.ButtonTabComponent;
 import com.virtualworld.generic.tabbedpanel.listeners.TabCloseListener;
@@ -12,7 +13,6 @@ import com.virtualworld.generic.tabbedpanel.listeners.TabRenameListener;
 import com.virtualworld.gui.TestJFrame;
 import com.virtualworld.mediator.RelationFkMediator;
 import com.virtualworld.mediator.listeners.MediatorEventListener;
-import com.virtualworld.model.Database;
 import com.virtualworld.model.exceptions.NonExistantValueException;
 import com.virtualworld.tree.DatabaseTreeModel;
 import com.virtualworld.tree.RelationTreeNode;
@@ -38,6 +38,7 @@ import javax.swing.tree.TreeModel;
 public class DatabaseJPanel extends javax.swing.JPanel
         implements TabCloseListener, TabRenameListener, MediatorEventListener {
 
+    private final RelationJpaController relationJpaController = new RelationJpaController();
     private final RelationFkMediator mediator = RelationFkMediator.getInstance();
     private String dataBaseName = "UlrichDb";
     private final String licence = "/*\n"
@@ -143,7 +144,7 @@ public class DatabaseJPanel extends javax.swing.JPanel
                 + "        return time.setJulianDay(julianDay);\n"
                 + "    }\n\n";
 
-        List<Relation> relations = Database.getRelations();
+        List<Relation> relations = relationJpaController.findRelationEntities();
         for (int i = 0; i < relations.size(); i++) {
             str += relations.get(i).toStringContract(1);
         }
@@ -178,7 +179,7 @@ public class DatabaseJPanel extends javax.swing.JPanel
 "    public void onCreate(SQLiteDatabase sqLiteDatabase) {";
         
         
-        List<Relation> relations = Database.getRelations();
+        List<Relation> relations = relationJpaController.findRelationEntities();
         for (int i = 0; i < relations.size(); i++) {
             str += relations.get(i).toStringOpenHelper(1,dataBaseName);
         }
@@ -379,12 +380,12 @@ public class DatabaseJPanel extends javax.swing.JPanel
 
     @Override
     public void onTabRename(int elementId) {
-        Relation relation = Database.findRelation(elementId);
+        Relation relation = relationJpaController.findRelation(elementId);
         String nom = JOptionPane.showInputDialog(this, "Veuillez fournir le nouveau nom", relation.getName());
         if (nom == null) {
             return;
         }
-        for (Relation r : Database.getRelations()) {
+        for (Relation r : relationJpaController.findRelationEntities()) {
             if (r.getName().equals(nom) && r.getId() != elementId) {
                 JOptionPane.showMessageDialog(this, "Une autre relation porte déjà ce nom", "Duplication", JOptionPane.ERROR_MESSAGE);
                 return;

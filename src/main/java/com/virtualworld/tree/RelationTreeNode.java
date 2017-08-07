@@ -5,9 +5,9 @@
  */
 package com.virtualworld.tree;
 
+import com.virtualworld.dao.AttributJpaController;
 import com.virtualworld.entities.Attribut;
 import com.virtualworld.gui.panels.RelationJPanel;
-import com.virtualworld.model.Database;
 import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -17,6 +17,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  */
 public class RelationTreeNode extends DefaultMutableTreeNode {
 
+    private final AttributJpaController attributJpaController = new AttributJpaController();
     private final RelationJPanel relation;
 
     /**
@@ -30,20 +31,18 @@ public class RelationTreeNode extends DefaultMutableTreeNode {
     }
 
     private void initComponents() {
-        List<Attribut> attributs = Database.findAttributsByRelationId(relation.getId());
-        for (Attribut at : attributs) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(at.getName());
+        List<Attribut> attributs = attributJpaController.findAttributsByRelationId(relation.getId());
+        attributs.stream().map((at) -> new DefaultMutableTreeNode(at.getName())).forEachOrdered((node) -> {
             add(node);
-        }
+        });
     }
 
     public void reload() {
         removeAllChildren();
-        List<Attribut> attributs = Database.findAttributsByRelationId(relation.getId());
-        for (Attribut at : attributs) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(at.getName());
+        List<Attribut> attributs = attributJpaController.findAttributsByRelationId(relation.getId());
+        attributs.stream().map((at) -> new DefaultMutableTreeNode(at.getName())).forEachOrdered((node) -> {
             add(node);
-        }
+        });
     }
 
 }

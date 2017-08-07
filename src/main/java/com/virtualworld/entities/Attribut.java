@@ -5,19 +5,32 @@
  */
 package com.virtualworld.entities;
 
+import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+
 /**
  *
  * @author Ulrich
  */
-public class Attribut {
+@Entity
+public class Attribut implements Serializable{
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     private DbTypes type;
     private String commentaire = "";
     private boolean nullable = true;
     private boolean pk = false;
+    @OneToOne
     private Attribut fkOn;
+    @ManyToOne
     private Relation relation;
 
     public Attribut() {
