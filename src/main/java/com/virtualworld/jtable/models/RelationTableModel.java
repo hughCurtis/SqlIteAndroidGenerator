@@ -5,12 +5,15 @@
  */
 package com.virtualworld.jtable.models;
 
+import com.virtualworld.dao.ctrl.AttributJpaController;
 import com.virtualworld.dao.entities.DbTypes;
 import com.virtualworld.dao.entities.Attribut;
 import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.listeners.PKSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 
 /**
@@ -18,6 +21,8 @@ import javax.swing.table.AbstractTableModel;
  * @author Ulrich
  */
 public class RelationTableModel extends AbstractTableModel implements PKSelectionEvent {
+
+    private static final Logger LOG = Logger.getLogger(RelationTableModel.class.getName());
 
     private final List<PKSelectionChangeListener> selectionChangeListeners = new ArrayList<>();
 
@@ -30,6 +35,8 @@ public class RelationTableModel extends AbstractTableModel implements PKSelectio
     private final int FK_COL = 4;
     private final int COMMENT_COL = 5;
     private final List<Attribut> attributs;
+
+    private final AttributJpaController attributJpaController = new AttributJpaController();
 
     private int pkRow = -1;
 
@@ -85,36 +92,46 @@ public class RelationTableModel extends AbstractTableModel implements PKSelectio
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        switch (columnIndex) {
-            case NOM_COL:
-                attributs.get(rowIndex).setName((String) aValue);
+        try {
+            switch (columnIndex) {
+                case NOM_COL:
+                    attributs.get(rowIndex).setName((String) aValue);
 //                if (attributs.get(rowIndex).isPk()) {
-                updatePKSelectionChangeListeners(attributs.get(rowIndex));
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    updatePKSelectionChangeListeners(attributs.get(rowIndex));
 //                }
-                break;
-            case TYPE_COL:
-                attributs.get(rowIndex).setType((DbTypes) aValue);
-                break;
-            case NULLABLE_COL:
-                attributs.get(rowIndex).setNullable((Boolean) aValue);
-                break;
-            case PK_COL:
-                Boolean value = (Boolean) aValue;
-                if (value) {
-                    pkRow = rowIndex;
-                    attributs.get(rowIndex).setNullable(false);
-                } else {
-                    pkRow = -1;
-                }
-                attributs.get(rowIndex).setPk(value);
-                updatePKSelectionChangeListeners(attributs.get(rowIndex));
-                break;
-            case FK_COL:
-                attributs.get(rowIndex).setFkOn((Attribut) aValue);
-                break;
-            case COMMENT_COL:
-                attributs.get(rowIndex).setCommentaire((String) aValue);
-                break;
+                    break;
+                case TYPE_COL:
+                    attributs.get(rowIndex).setType((DbTypes) aValue);
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    break;
+                case NULLABLE_COL:
+                    attributs.get(rowIndex).setNullable((Boolean) aValue);
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    break;
+                case PK_COL:
+                    Boolean value = (Boolean) aValue;
+                    if (value) {
+                        pkRow = rowIndex;
+                        attributs.get(rowIndex).setNullable(false);
+                    } else {
+                        pkRow = -1;
+                    }
+                    attributs.get(rowIndex).setPk(value);
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    updatePKSelectionChangeListeners(attributs.get(rowIndex));
+                    break;
+                case FK_COL:
+                    attributs.get(rowIndex).setFkOn((Attribut) aValue);
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    break;
+                case COMMENT_COL:
+                    attributs.get(rowIndex).setCommentaire((String) aValue);
+                    attributJpaController.edit(attributs.get(rowIndex));
+                    break;
+            }
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, null, e);
         }
     }
 

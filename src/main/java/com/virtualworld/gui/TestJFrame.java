@@ -8,8 +8,10 @@ package com.virtualworld.gui;
 import com.virtualworld.dao.ctrl.DataBaseJpaController;
 import com.virtualworld.dao.entities.DataBase;
 import com.virtualworld.gui.panels.DatabaseJPanel;
+import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -25,24 +27,36 @@ public class TestJFrame extends javax.swing.JFrame {
     public TestJFrame() {
         initComponents();
         List<DataBase> dbs = dataBaseJpaController.findDataBaseEntities();
+        boolean isFirst = true;
         if (dbs.isEmpty()) {
             DataBase dbe = new DataBase();
             dbe.setDatabaseName("DataBaseName");
             dataBaseJpaController.create(dbe);
             DatabaseJPanel db = new DatabaseJPanel(dbe);
             addDatabase(db);
+            databaseLayoutJPanel.add(db);
         } else {
-            dbs.forEach((db) -> {
-                addDatabase(new DatabaseJPanel(db));
-            });
+            DatabaseJPanel pan;
+            for (DataBase db : dbs) {
+                pan = new DatabaseJPanel(db);
+                addDatabase(pan);
+                if (isFirst) {
+                    databaseLayoutJPanel.add(pan);
+                    isFirst = false;
+                }
+            }
         }
     }
 
     private void addDatabase(DatabaseJPanel dbPanel) {
-        databaseLayoutJPanel.add(dbPanel);
         JMenuItem item = new JMenuItem(dbPanel.getDataBaseName());
         item.setFont(new java.awt.Font("Segoe UI", 0, 16));
         bdJMenu.add(item);
+        item.addActionListener((ActionEvent e) -> {
+            databaseLayoutJPanel.removeAll();
+            databaseLayoutJPanel.add(dbPanel);
+            databaseLayoutJPanel.updateUI();
+        });
     }
 
     /**
@@ -61,6 +75,7 @@ public class TestJFrame extends javax.swing.JFrame {
         databaseLayoutJPanel = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         fichierJMenu = new javax.swing.JMenu();
+        newDbJMenuItem = new javax.swing.JMenuItem();
         bdJMenu = new javax.swing.JMenu();
         jMenu1 = new javax.swing.JMenu();
 
@@ -93,6 +108,18 @@ public class TestJFrame extends javax.swing.JFrame {
         fichierJMenu.setMnemonic('f');
         fichierJMenu.setText("Fichier");
         fichierJMenu.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+
+        newDbJMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        newDbJMenuItem.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        newDbJMenuItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconPLUS_16x16.png"))); // NOI18N
+        newDbJMenuItem.setText("Nouvelle Base de données");
+        newDbJMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newDbJMenuItemActionPerformed(evt);
+            }
+        });
+        fichierJMenu.add(newDbJMenuItem);
+
         jMenuBar1.add(fichierJMenu);
 
         bdJMenu.setMnemonic('b');
@@ -120,6 +147,27 @@ public class TestJFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void newDbJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDbJMenuItemActionPerformed
+        String dbName = JOptionPane.showInputDialog("Nom de la base de données");
+        if (dbName == null) {
+            return;
+        }
+
+        DataBase db;
+        db = dataBaseJpaController.findByName(dbName);
+        while (db != null) {
+            dbName = JOptionPane.showInputDialog("Ce nom est déjà utilisé. Choisissez en un autre!");
+            if (dbName == null) {
+                return;
+            }
+            db = dataBaseJpaController.findByName(dbName);
+        }
+        db = new DataBase();
+        db.setDatabaseName(dbName);
+        dataBaseJpaController.create(db);
+        addDatabase(new DatabaseJPanel(db));
+    }//GEN-LAST:event_newDbJMenuItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -162,6 +210,7 @@ public class TestJFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JMenuItem newDbJMenuItem;
     // End of variables declaration//GEN-END:variables
 
 }

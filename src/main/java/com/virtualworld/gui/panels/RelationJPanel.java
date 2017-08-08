@@ -16,7 +16,6 @@ import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.models.RelationTableModel;
 import com.virtualworld.mediator.RelationFkMediator;
 import com.virtualworld.mediator.listeners.MediatorEventListener;
-import com.virtualworld.model.exceptions.NonExistantValueException;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -102,7 +101,7 @@ public class RelationJPanel extends javax.swing.JPanel
         return id;
     }
 
-    public void delete() throws NonExistantValueException {
+    public void delete() throws NonexistentEntityException {
         try {
             relationJpaController.destroy(id);
             mediator.removeMediatorEventListener(this);

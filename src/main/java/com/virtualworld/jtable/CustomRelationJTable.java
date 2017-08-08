@@ -53,17 +53,20 @@ public class CustomRelationJTable extends JTable implements PKSelectionChangeLis
     }
 
     private void initComponent() throws NonExistantValueException {
-        List<Attribut> relations = new ArrayList<>();
-        Attribut at;
-        for (int i = 0; i < 3; i++) {
-            at = new Attribut();
-            char nom = (char) (i+'a');
-            at.setName(nom + "");
-            relations.add(at);
-            at.setRelation(relation);
-            attributJpaController.create(at);
+        List<Attribut> attributs = attributJpaController.findAttributsByRelationId(relation.getId());
+
+        if (attributs.isEmpty()) {
+            Attribut at;
+            for (int i = 0; i < 3; i++) {
+                at = new Attribut();
+                char nom = (char) (i + 'a');
+                at.setName(nom + "");
+                attributs.add(at);
+                at.setRelation(relation);
+                attributJpaController.create(at);
+            }
         }
-        model = new RelationTableModel(relations);
+        model = new RelationTableModel(attributs);
         model.addPKSelectionChangeListener(this);
         setModel(model);
 

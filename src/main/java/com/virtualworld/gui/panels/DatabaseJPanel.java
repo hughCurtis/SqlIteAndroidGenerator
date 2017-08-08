@@ -6,15 +6,14 @@
 package com.virtualworld.gui.panels;
 
 import com.virtualworld.dao.ctrl.RelationJpaController;
+import com.virtualworld.dao.ctrl.exceptions.NonexistentEntityException;
 import com.virtualworld.dao.entities.DataBase;
 import com.virtualworld.dao.entities.Relation;
 import com.virtualworld.generic.tabbedpanel.ButtonTabComponent;
 import com.virtualworld.generic.tabbedpanel.listeners.TabCloseListener;
 import com.virtualworld.generic.tabbedpanel.listeners.TabRenameListener;
-import com.virtualworld.gui.TestJFrame;
 import com.virtualworld.mediator.RelationFkMediator;
 import com.virtualworld.mediator.listeners.MediatorEventListener;
-import com.virtualworld.model.exceptions.NonExistantValueException;
 import com.virtualworld.tree.DatabaseTreeModel;
 import com.virtualworld.tree.RelationTreeNode;
 import java.awt.Font;
@@ -39,24 +38,13 @@ import javax.swing.tree.TreeModel;
 public class DatabaseJPanel extends javax.swing.JPanel
         implements TabCloseListener, TabRenameListener, MediatorEventListener {
 
+    private static final Logger LOG = Logger.getLogger(DatabaseJPanel.class.getName());
+
     private final RelationJpaController relationJpaController = new RelationJpaController();
     private final RelationFkMediator mediator = RelationFkMediator.getInstance();
-    private String dataBaseName = "UlrichDb";
-    private DataBase dataBase;
-    private final String licence = "/*\n"
-            + " * Ce document intitulé «  " + dataBaseName + "Contract.java" + "  » du package sqlitegenerator proposé par HCurti$ et Ulrich TIAYO\n"
-            + " * issus du SEED(www.seed-innov.com) est mis à disposition sous les termes de la licence Creative Commons. \n"
-            + " * Vous pouvez copier, modifier des copies de cette page, dans les conditions fixées par la licence, \n"
-            + " * tant que cette note apparaît clairement.\n"
-            + " */\n\n";
-
-    /**
-     * Creates new form DatabaseJPanel
-     */
-    public DatabaseJPanel() {
-        initComponents();
-        postInit();
-    }
+    private final String dataBaseName;
+    private final DataBase dataBase;
+    private final String licence;
 
     /**
      * Creates new form DatabaseJPanel
@@ -64,18 +52,20 @@ public class DatabaseJPanel extends javax.swing.JPanel
      * @param dataBase
      */
     public DatabaseJPanel(DataBase dataBase) {
-        initComponents();
         this.dataBase = dataBase;
         this.dataBaseName = dataBase.getDatabaseName();
+        initComponents();
+        licence = "/*\n"
+                + " * Ce document intitulé «  " + dataBaseName + "Contract.java" + "  » du package sqlitegenerator proposé par HCurti$ et Ulrich TIAYO\n"
+                + " * issus du SEED(www.seed-innov.com) est mis à disposition sous les termes de la licence Creative Commons. \n"
+                + " * Vous pouvez copier, modifier des copies de cette page, dans les conditions fixées par la licence, \n"
+                + " * tant que cette note apparaît clairement.\n"
+                + " */\n\n";
         postInit();
     }
 
     public String getDataBaseName() {
         return dataBaseName;
-    }
-
-    public void setDataBaseName(String dataBaseName) {
-        this.dataBaseName = dataBaseName;
     }
 
     private void postInit() {
@@ -85,11 +75,18 @@ public class DatabaseJPanel extends javax.swing.JPanel
         paneJTabbedPane.removeAll();
         List<Relation> relations = relationJpaController.findByDbId(dataBase.getId());
         int index = 0;
-        for (Relation r : relations) {
-            RelationJPanel relation = new RelationJPanel(r);
+        if (relations.isEmpty()) {
+            RelationJPanel relation = new RelationJPanel(dataBase);
             String title = Relation.DEFAULT_RELATION_NAME + " " + relation.getId();
             paneJTabbedPane.add((String) null, relation);
             initTabComponent(index++, title, relation.getId());
+        } else {
+            for (Relation r : relations) {
+                RelationJPanel relation = new RelationJPanel(r);
+                String title = Relation.DEFAULT_RELATION_NAME + " " + relation.getId();
+                paneJTabbedPane.add((String) null, relation);
+                initTabComponent(index++, title, relation.getId());
+            }
         }
 //        for (int i = 0; i < 4; i++) {
 //        }
@@ -352,7 +349,7 @@ public class DatabaseJPanel extends javax.swing.JPanel
     private javax.swing.JTabbedPane paneJTabbedPane;
     // End of variables declaration//GEN-END:variables
 
-    public void addTabAddAction() {
+    private void addTabAddAction() {
         int nbre = paneJTabbedPane.getTabCount();
         RelationJPanel relation = new RelationJPanel(dataBase);
         paneJTabbedPane.insertTab("Titre", null, relation, null, nbre - 1);
@@ -377,8 +374,8 @@ public class DatabaseJPanel extends javax.swing.JPanel
             if (panel.getId() == elementId) {
                 try {
                     panel.delete();
-                } catch (NonExistantValueException ex) {
-                    Logger.getLogger(TestJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NonexistentEntityException ex) {
+                    LOG.log(Level.SEVERE, "Erreur lors de la suppression d'une relation", ex);
                 }
                 paneJTabbedPane.remove(i);
                 break;
@@ -400,6 +397,11 @@ public class DatabaseJPanel extends javax.swing.JPanel
             }
         }
         relation.setName(nom);
+        try {
+            relationJpaController.edit(relation);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, null, e);
+        }
 
         int taille = paneJTabbedPane.getTabCount();
         RelationJPanel panel;

@@ -140,11 +140,17 @@ public class DataBaseJpaController implements Serializable {
         }
     }
 
+    /**
+     * La casse n'est pas prise en compte
+     *
+     * @param dbName
+     * @return
+     */
     public DataBase findByName(String dbName) {
         EntityManager em = getEntityManager();
         try {
-            Query q = em.createQuery("SELECT d FROM DataBase d WHERE d.databaseName = ?1");
-            q.setParameter(1, dbName);
+            Query q = em.createQuery("SELECT d FROM DataBase d WHERE UPPER(d.databaseName) = ?1");
+            q.setParameter(1, dbName.toUpperCase());
             return (DataBase) q.getSingleResult();
         } catch (Exception e) {
             LOG.log(Level.INFO, "Recherche de BD par le nom{0}", e.getMessage());
