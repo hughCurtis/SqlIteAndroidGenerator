@@ -5,7 +5,10 @@
  */
 package com.virtualworld.gui;
 
+import com.virtualworld.dao.ctrl.DataBaseJpaController;
+import com.virtualworld.dao.entities.DataBase;
 import com.virtualworld.gui.panels.DatabaseJPanel;
+import java.util.List;
 import javax.swing.JMenuItem;
 
 /**
@@ -14,16 +17,28 @@ import javax.swing.JMenuItem;
  */
 public class TestJFrame extends javax.swing.JFrame {
 
+    private final DataBaseJpaController dataBaseJpaController = new DataBaseJpaController();
+
     /**
      * Creates new form TestJFrame
      */
     public TestJFrame() {
         initComponents();
-        DatabaseJPanel db = new DatabaseJPanel("DataBaseName");
-        addDatabase(db);
+        List<DataBase> dbs = dataBaseJpaController.findDataBaseEntities();
+        if (dbs.isEmpty()) {
+            DataBase dbe = new DataBase();
+            dbe.setDatabaseName("DataBaseName");
+            dataBaseJpaController.create(dbe);
+            DatabaseJPanel db = new DatabaseJPanel(dbe);
+            addDatabase(db);
+        } else {
+            dbs.forEach((db) -> {
+                addDatabase(new DatabaseJPanel(db));
+            });
+        }
     }
 
-    private void addDatabase(DatabaseJPanel dbPanel){
+    private void addDatabase(DatabaseJPanel dbPanel) {
         databaseLayoutJPanel.add(dbPanel);
         JMenuItem item = new JMenuItem(dbPanel.getDataBaseName());
         item.setFont(new java.awt.Font("Segoe UI", 0, 16));

@@ -5,8 +5,8 @@
  */
 package com.virtualworld.jtable.models;
 
-import com.virtualworld.entities.DbTypes;
-import com.virtualworld.entities.Attribut;
+import com.virtualworld.dao.entities.DbTypes;
+import com.virtualworld.dao.entities.Attribut;
 import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.listeners.PKSelectionEvent;
 import java.util.ArrayList;

@@ -5,8 +5,8 @@
  */
 package com.virtualworld.tree;
 
-import com.virtualworld.dao.AttributJpaController;
-import com.virtualworld.entities.Attribut;
+import com.virtualworld.dao.ctrl.AttributJpaController;
+import com.virtualworld.dao.entities.Attribut;
 import com.virtualworld.gui.panels.RelationJPanel;
 import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;

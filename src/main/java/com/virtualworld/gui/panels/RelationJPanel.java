@@ -5,11 +5,12 @@
  */
 package com.virtualworld.gui.panels;
 
-import com.virtualworld.dao.AttributJpaController;
-import com.virtualworld.dao.RelationJpaController;
-import com.virtualworld.dao.exceptions.NonexistentEntityException;
-import com.virtualworld.entities.Attribut;
-import com.virtualworld.entities.Relation;
+import com.virtualworld.dao.ctrl.AttributJpaController;
+import com.virtualworld.dao.ctrl.RelationJpaController;
+import com.virtualworld.dao.ctrl.exceptions.NonexistentEntityException;
+import com.virtualworld.dao.entities.Attribut;
+import com.virtualworld.dao.entities.DataBase;
+import com.virtualworld.dao.entities.Relation;
 import com.virtualworld.jtable.CustomRelationJTable;
 import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.models.RelationTableModel;
@@ -39,13 +40,33 @@ public class RelationJPanel extends javax.swing.JPanel
     private Relation relation;
     private final CustomRelationJTable attributesJTable;
     private final RelationFkMediator mediator = RelationFkMediator.getInstance();
+    private final DataBase dataBase;
 
     /**
      * Creates new form relationJPanel
+     * @param dataBase
      */
-    public RelationJPanel() {
+    public RelationJPanel(DataBase dataBase) {
+        this.dataBase = dataBase;
         initComponents();
         saveInDatabase();
+
+        attributesJTable = new CustomRelationJTable(relation);
+        JScrollPane scroll = new JScrollPane();
+        scroll.setViewportView(attributesJTable);
+        attributesContainerJPanel.add(scroll);
+        id = relation.getId();
+        registerToListeners();
+    }
+
+    /**
+     * Creates new form relationJPanel
+     * @param relation
+     */
+    public RelationJPanel(Relation relation) {
+        this.dataBase = relation.getDataBase();
+        this.relation = relation;
+        initComponents();
 
         attributesJTable = new CustomRelationJTable(relation);
         JScrollPane scroll = new JScrollPane();
@@ -67,6 +88,7 @@ public class RelationJPanel extends javax.swing.JPanel
 
     private void saveInDatabase() {
         relation = new Relation();
+        relation.setDataBase(dataBase);
         relationJpaController.create(relation);
         relation.setName(Relation.DEFAULT_RELATION_NAME + " " + relation.getId());
         try {

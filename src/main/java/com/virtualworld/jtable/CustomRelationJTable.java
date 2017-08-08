@@ -5,16 +5,15 @@
  */
 package com.virtualworld.jtable;
 
-import com.virtualworld.dao.AttributJpaController;
-import com.virtualworld.entities.Attribut;
-import com.virtualworld.entities.DbTypes;
-import com.virtualworld.entities.Relation;
+import com.virtualworld.dao.ctrl.AttributJpaController;
+import com.virtualworld.dao.entities.Attribut;
+import com.virtualworld.dao.entities.DbTypes;
+import com.virtualworld.dao.entities.Relation;
 import com.virtualworld.jtable.listeners.PKSelectionChangeListener;
 import com.virtualworld.jtable.listeners.PKSelectionEvent;
 import com.virtualworld.jtable.models.BooleanCellRenderer;
 import com.virtualworld.jtable.models.CustomTableRenderer;
 import com.virtualworld.jtable.models.RelationTableModel;
-import com.virtualworld.model.Database;
 import com.virtualworld.model.exceptions.NonExistantValueException;
 import java.util.ArrayList;
 import java.util.List;

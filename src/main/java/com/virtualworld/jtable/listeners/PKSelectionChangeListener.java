@@ -5,7 +5,7 @@
  */
 package com.virtualworld.jtable.listeners;
 
-import com.virtualworld.entities.Attribut;
+import com.virtualworld.dao.entities.Attribut;
 
 /**
  *

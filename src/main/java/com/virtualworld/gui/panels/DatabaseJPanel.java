@@ -5,8 +5,9 @@
  */
 package com.virtualworld.gui.panels;
 
-import com.virtualworld.dao.RelationJpaController;
-import com.virtualworld.entities.Relation;
+import com.virtualworld.dao.ctrl.RelationJpaController;
+import com.virtualworld.dao.entities.DataBase;
+import com.virtualworld.dao.entities.Relation;
 import com.virtualworld.generic.tabbedpanel.ButtonTabComponent;
 import com.virtualworld.generic.tabbedpanel.listeners.TabCloseListener;
 import com.virtualworld.generic.tabbedpanel.listeners.TabRenameListener;
@@ -41,13 +42,14 @@ public class DatabaseJPanel extends javax.swing.JPanel
     private final RelationJpaController relationJpaController = new RelationJpaController();
     private final RelationFkMediator mediator = RelationFkMediator.getInstance();
     private String dataBaseName = "UlrichDb";
+    private DataBase dataBase;
     private final String licence = "/*\n"
             + " * Ce document intitulé «  " + dataBaseName + "Contract.java" + "  » du package sqlitegenerator proposé par HCurti$ et Ulrich TIAYO\n"
             + " * issus du SEED(www.seed-innov.com) est mis à disposition sous les termes de la licence Creative Commons. \n"
             + " * Vous pouvez copier, modifier des copies de cette page, dans les conditions fixées par la licence, \n"
             + " * tant que cette note apparaît clairement.\n"
             + " */\n\n";
-    
+
     /**
      * Creates new form DatabaseJPanel
      */
@@ -58,15 +60,17 @@ public class DatabaseJPanel extends javax.swing.JPanel
 
     /**
      * Creates new form DatabaseJPanel
-     * @param dataBaseName
+     *
+     * @param dataBase
      */
-    public DatabaseJPanel(String dataBaseName) {
+    public DatabaseJPanel(DataBase dataBase) {
         initComponents();
-        this.dataBaseName = dataBaseName;
+        this.dataBase = dataBase;
+        this.dataBaseName = dataBase.getDatabaseName();
         postInit();
     }
 
-    public  String getDataBaseName() {
+    public String getDataBaseName() {
         return dataBaseName;
     }
 
@@ -79,11 +83,15 @@ public class DatabaseJPanel extends javax.swing.JPanel
         dbNameJLabel.setText(dataBaseName);
 
         paneJTabbedPane.removeAll();
+        List<Relation> relations = relationJpaController.findByDbId(dataBase.getId());
+        int index = 0;
+        for (Relation r : relations) {
+            RelationJPanel relation = new RelationJPanel(r);
+            String title = Relation.DEFAULT_RELATION_NAME + " " + relation.getId();
+            paneJTabbedPane.add((String) null, relation);
+            initTabComponent(index++, title, relation.getId());
+        }
 //        for (int i = 0; i < 4; i++) {
-        RelationJPanel relation = new RelationJPanel();
-        String title = Relation.DEFAULT_RELATION_NAME + " " + relation.getId();
-        paneJTabbedPane.add((String) null, relation);
-        initTabComponent(0, title, relation.getId());
 //        }
         paneJTabbedPane.add("", new AddDetailsJPanel());
         JButton bouton = new JButton("+");
@@ -93,7 +101,7 @@ public class DatabaseJPanel extends javax.swing.JPanel
         bouton.setBorderPainted(false);
         bouton.setContentAreaFilled(false);
         bouton.setFont(new Font("Tahoma", Font.PLAIN, 20));
-        paneJTabbedPane.setTabComponentAt(1, bouton);
+        paneJTabbedPane.setTabComponentAt(index, bouton);
         paneJTabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     }
 
@@ -113,6 +121,7 @@ public class DatabaseJPanel extends javax.swing.JPanel
         file.write(generateContractContent());
         file.close();
     }
+
     public void genererOpenHelper() throws Exception {
         FileWriter file;
         file = new FileWriter(new File(dataBaseName + "DBOpenHelper.java"));
@@ -152,42 +161,41 @@ public class DatabaseJPanel extends javax.swing.JPanel
         return str + "\n}";
     }
 
-    public String generateOpenHelperContent(){
+    public String generateOpenHelperContent() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
         String str = "\npackage "
                 + "Ajouter votre package ici"
-                + "import android.content.Context;\n" +
-"import android.database.sqlite.SQLiteDatabase;\n" +
-"import android.database.sqlite.SQLiteOpenHelper;\n" +
-"\n" +
-"/**\n" +
-" * Created by SqlIteCodeGenerator for Android on " + sdf.format(Calendar.getInstance().getTime()) + ".\n"+
-" */\n" +
-"public class "+dataBaseName+"DBOpenHelper extends SQLiteOpenHelper {\n" +
-"\n" +
-"\n" +
-"    // If you change the database schema, you must increment the database version.\n" +
-"    public static final int DATABASE_VERSION = 1;\n" +
-"\n" +
-"    public static final String DATABASE_NAME = \""+dataBaseName+"\";\n" +
-"\n" +
-"    public "+dataBaseName+"DBOpenHelper(Context context) {\n" +
-"        super(context, DATABASE_NAME, null, DATABASE_VERSION);\n" +
-"    }\n" +
-"\n" +
-"    @Override\n" +
-"    public void onCreate(SQLiteDatabase sqLiteDatabase) {";
-        
-        
+                + "import android.content.Context;\n"
+                + "import android.database.sqlite.SQLiteDatabase;\n"
+                + "import android.database.sqlite.SQLiteOpenHelper;\n"
+                + "\n"
+                + "/**\n"
+                + " * Created by SqlIteCodeGenerator for Android on " + sdf.format(Calendar.getInstance().getTime()) + ".\n"
+                + " */\n"
+                + "public class " + dataBaseName + "DBOpenHelper extends SQLiteOpenHelper {\n"
+                + "\n"
+                + "\n"
+                + "    // If you change the database schema, you must increment the database version.\n"
+                + "    public static final int DATABASE_VERSION = 1;\n"
+                + "\n"
+                + "    public static final String DATABASE_NAME = \"" + dataBaseName + "\";\n"
+                + "\n"
+                + "    public " + dataBaseName + "DBOpenHelper(Context context) {\n"
+                + "        super(context, DATABASE_NAME, null, DATABASE_VERSION);\n"
+                + "    }\n"
+                + "\n"
+                + "    @Override\n"
+                + "    public void onCreate(SQLiteDatabase sqLiteDatabase) {";
+
         List<Relation> relations = relationJpaController.findRelationEntities();
         for (int i = 0; i < relations.size(); i++) {
-            str += relations.get(i).toStringOpenHelper(1,dataBaseName);
+            str += relations.get(i).toStringOpenHelper(1, dataBaseName);
         }
-        
-        
+
         return str;
-        
+
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -346,12 +354,12 @@ public class DatabaseJPanel extends javax.swing.JPanel
 
     public void addTabAddAction() {
         int nbre = paneJTabbedPane.getTabCount();
-        RelationJPanel relation = new RelationJPanel();
+        RelationJPanel relation = new RelationJPanel(dataBase);
         paneJTabbedPane.insertTab("Titre", null, relation, null, nbre - 1);
         String relationName = Relation.DEFAULT_RELATION_NAME + " " + relation.getId();
         initTabComponent(nbre - 1, relationName, relation.getId());
     }
-    
+
     @Override
     public void onTabClose(int elementId) {
         int confirm = JOptionPane.showConfirmDialog(this, "Voulez vous vraiment supprimer la relation?");
@@ -424,5 +432,5 @@ public class DatabaseJPanel extends javax.swing.JPanel
         }
         attributesJTree.repaint();
     }
-    
+
 }
