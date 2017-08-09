@@ -1,1 +1,4 @@
 /target/
+/DataBaseNameContract.java
+/DataBaseNameDBOpenHelper.java
+/*.log
